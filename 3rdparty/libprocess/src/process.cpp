@@ -3549,6 +3549,31 @@ void ProcessBase::consume(DispatchEvent&& event)
 }
 
 
+namespace {
+
+
+string removeEndpoint(string const& path)
+{
+  char const SEP = '/';
+  if(!path.empty()) {
+    string::size_type end = path.find_last_not_of(SEP);
+    end = path.find_last_of(SEP, end);
+    if(end != string::npos) {
+      end = path.find_last_not_of(SEP, end);
+      if(end != string::npos) {
+        return path.substr(0, end + 1);
+      } else {
+        return "/";
+      }
+    }
+  }
+  return ".";
+}
+
+
+}
+
+
 void ProcessBase::consume(HttpEvent&& event)
 {
   VLOG(1) << "Handling HTTP event for process '" << pid.id << "'"
@@ -3588,9 +3613,9 @@ void ProcessBase::consume(HttpEvent&& event)
   // but if no handler is found and the path is nested, we shorten it and look
   // again. For example: if the request is for '/a/b/c' and no handler is found,
   // we will then check for '/a/b', and finally for '/a'.
-  while (Path(name).dirname() != name) {
+  while (removeEndpoint(name) != name) {
     if (handlers.http.count(name) == 0) {
-      name = Path(name).dirname();
+      name = removeEndpoint(name);
       continue;
     }
 
