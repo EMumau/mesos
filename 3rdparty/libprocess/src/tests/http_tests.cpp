@@ -1,3 +1,4 @@
+
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
 // You may obtain a copy of the License at
@@ -300,10 +301,7 @@ TEST_P(HTTPTest, Endpoints)
 }
 
 
-// TODO(hausdorff): Routing logic is broken on Windows. Fix and enable test. In
-// this case, the '/help/(14)/body' route is missing, but the /help/(14) route
-// exists. See MESOS-5904.
-TEST_P_TEMP_DISABLED_ON_WINDOWS(HTTPTest, EndpointsHelp)
+TEST_P(HTTPTest, EndpointsHelp)
 {
   Http http;
   PID<HttpProcess> pid = http.process->self();
@@ -372,10 +370,7 @@ TEST_P_TEMP_DISABLED_ON_WINDOWS(HTTPTest, EndpointsHelp)
 }
 
 
-// TODO(hausdorff): Routing logic is broken on Windows. Fix and enable test. In
-// this case, the '/help/(14)/body' route is missing, but the /help/(14) route
-// exists. See MESOS-5904.
-TEST_P_TEMP_DISABLED_ON_WINDOWS(HTTPTest, EndpointsHelpRemoval)
+TEST_P(HTTPTest, EndpointsHelpRemoval)
 {
   // Start up a new HttpProcess;
   Owned<Http> http(new Http());
@@ -707,10 +702,7 @@ TEST_P(HTTPTest, Get)
 }
 
 
-// TODO(hausdorff): Routing logic is broken on Windows. Fix and enable test. In
-// this case, the route '/a/b/c' exists and returns 200 ok, but '/a/b' does
-// not. See MESOS-5904.
-TEST_P_TEMP_DISABLED_ON_WINDOWS(HTTPTest, NestedGet)
+TEST_P(HTTPTest, NestedGet)
 {
   Http http;
 
@@ -1418,11 +1410,7 @@ TEST(HTTPConnectionTest, RequestStreaming)
 }
 
 
-// TODO(hausdorff): This test seems to create inconsistent (though not
-// incorrect) results across platforms. Fix and enable the test on Windows. In
-// particular, the encoding in the 3rd example puts the first variable into the
-// query string before the second, but we expect the reverse. See MESOS-5814.
-TEST_P_TEMP_DISABLED_ON_WINDOWS(HTTPTest, QueryEncodeDecode)
+TEST_P(HTTPTest, QueryEncodeDecode)
 {
   // If we use Type<a, b> directly inside a macro without surrounding
   // parenthesis the comma will be eaten by the macro rather than the
@@ -1434,10 +1422,6 @@ TEST_P_TEMP_DISABLED_ON_WINDOWS(HTTPTest, QueryEncodeDecode)
 
   EXPECT_EQ("foo=bar",
             http::query::encode(HashmapStringString({{"foo", "bar"}})));
-
-  EXPECT_EQ("c%7E%2Fasdf=%25asdf&a()=b%2520",
-            http::query::encode(
-                HashmapStringString({{"a()", "b%20"}, {"c~/asdf", "%asdf"}})));
 
   EXPECT_EQ("d",
             http::query::encode(HashmapStringString({{"d", ""}})));
@@ -1452,14 +1436,16 @@ TEST_P_TEMP_DISABLED_ON_WINDOWS(HTTPTest, QueryEncodeDecode)
   EXPECT_SOME_EQ(HashmapStringString({{"foo", "bar"}}),
                  http::query::decode("foo=bar"));
 
-  EXPECT_SOME_EQ(HashmapStringString({{"a()", "b%20"}, {"c~/asdf", "%asdf"}}),
-                 http::query::decode("c%7E%2Fasdf=%25asdf&a()=b%2520"));
-
   EXPECT_SOME_EQ(HashmapStringString({{"d", ""}}),
                  http::query::decode("d"));
 
   EXPECT_SOME_EQ(HashmapStringString({{"a&b=c", "d&e=fg"}}),
                  http::query::decode("a%26b%3Dc=d%26e%3Dfg"));
+
+  HashmapStringString a1({{"a()", "b%20"}, {"c~/asdf", "%asdf"}});
+  string encoded1 = http::query::encode(a1);
+  HashmapStringString b1(http::query::decode(encoded1).get());
+  EXPECT_EQ(a1, b1);
 }
 
 
