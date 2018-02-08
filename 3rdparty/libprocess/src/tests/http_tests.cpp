@@ -1437,11 +1437,7 @@ TEST(HTTPConnectionTest, RequestStreaming)
 }
 
 
-// TODO(hausdorff): This test seems to create inconsistent (though not
-// incorrect) results across platforms. Fix and enable the test on Windows. In
-// particular, the encoding in the 3rd example puts the first variable into the
-// query string before the second, but we expect the reverse. See MESOS-5814.
-TEST_P_TEMP_DISABLED_ON_WINDOWS(HTTPTest, QueryEncodeDecode)
+TEST_P(HTTPTest, QueryEncodeDecode)
 {
   // If we use Type<a, b> directly inside a macro without surrounding
   // parenthesis the comma will be eaten by the macro rather than the
@@ -1454,9 +1450,10 @@ TEST_P_TEMP_DISABLED_ON_WINDOWS(HTTPTest, QueryEncodeDecode)
   EXPECT_EQ("foo=bar",
             http::query::encode(HashmapStringString({{"foo", "bar"}})));
 
-  EXPECT_EQ("c%7E%2Fasdf=%25asdf&a()=b%2520",
-            http::query::encode(
-                HashmapStringString({{"a()", "b%20"}, {"c~/asdf", "%asdf"}})));
+  const string encoded = http::query::encode(
+      HashmapStringString({{"a()", "b%20"}, {"c~/asdf", "%asdf"}}));
+  EXPECT_TRUE(encoded == "c%7E%2Fasdf=%25asdf&a()=b%2520" ||
+              encoded == "a()=b%2520&c%7E%2Fasdf=%25asdf");
 
   EXPECT_EQ("d",
             http::query::encode(HashmapStringString({{"d", ""}})));
@@ -1473,6 +1470,9 @@ TEST_P_TEMP_DISABLED_ON_WINDOWS(HTTPTest, QueryEncodeDecode)
 
   EXPECT_SOME_EQ(HashmapStringString({{"a()", "b%20"}, {"c~/asdf", "%asdf"}}),
                  http::query::decode("c%7E%2Fasdf=%25asdf&a()=b%2520"));
+
+  EXPECT_SOME_EQ(HashmapStringString({{"a()", "b%20"}, {"c~/asdf", "%asdf"}}),
+                 http::query::decode("a()=b%2520&c%7E%2Fasdf=%25asdf"));
 
   EXPECT_SOME_EQ(HashmapStringString({{"d", ""}}),
                  http::query::decode("d"));
