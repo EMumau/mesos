@@ -1478,6 +1478,12 @@ TEST_P(HTTPTest, QueryEncodeDecode)
                  http::query::decode("c%7E%2Fasdf=%25asdf&a()=b%2520"));
   EXPECT_SOME_EQ(HashmapStringString({{"a()", "b%20"}, {"c~/asdf", "%asdf"}}),
                  http::query::decode("a()=b%2520&c%7E%2Fasdf=%25asdf"));
+<<<<<<< HEAD
+=======
+
+  EXPECT_SOME_EQ(HashmapStringString({{"a()", "b%20"}, {"c~/asdf", "%asdf"}}),
+                 http::query::decode("a()=b%2520&c%7E%2Fasdf=%25asdf"));
+>>>>>>> 97275b294dc80c85b194bd7cb163f2ba1b891cb4
 
   EXPECT_SOME_EQ(HashmapStringString({{"d", ""}}),
                  http::query::decode("d"));
