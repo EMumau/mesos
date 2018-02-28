@@ -1450,6 +1450,9 @@ TEST_P(HTTPTest, QueryEncodeDecode)
   EXPECT_EQ("foo=bar",
             http::query::encode(HashmapStringString({{"foo", "bar"}})));
 
+  // encode should return either of two possible correct strings depending upon
+  // the implementation of std::unsorted_map.  This ensures that the string
+  // returned matches one of those two possible strings.
   const string encoded = http::query::encode(
       HashmapStringString({{"a()", "b%20"}, {"c~/asdf", "%asdf"}}));
   EXPECT_TRUE(encoded == "c%7E%2Fasdf=%25asdf&a()=b%2520" ||
@@ -1468,9 +1471,11 @@ TEST_P(HTTPTest, QueryEncodeDecode)
   EXPECT_SOME_EQ(HashmapStringString({{"foo", "bar"}}),
                  http::query::decode("foo=bar"));
 
+  // encode should return either of two possible correct strings depending upon
+  // the implementation of std::unsorted_map.  The following two tests ensure
+  // that each possible string is decoded correctly.
   EXPECT_SOME_EQ(HashmapStringString({{"a()", "b%20"}, {"c~/asdf", "%asdf"}}),
                  http::query::decode("c%7E%2Fasdf=%25asdf&a()=b%2520"));
-
   EXPECT_SOME_EQ(HashmapStringString({{"a()", "b%20"}, {"c~/asdf", "%asdf"}}),
                  http::query::decode("a()=b%2520&c%7E%2Fasdf=%25asdf"));
 
