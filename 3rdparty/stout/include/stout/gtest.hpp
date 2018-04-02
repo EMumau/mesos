@@ -239,7 +239,7 @@ template <typename T1, typename T2>
 #define SLEEP_COMMAND(x) "sleep " #x
 #else
 #define SLEEP_COMMAND(x) \
-  "powershell -NoProfile -Command Start-Sleep -Seconds " #x
+  "timeout /T " #x " /NOBREAK > nul"
 #endif // __WINDOWS__
 
 
