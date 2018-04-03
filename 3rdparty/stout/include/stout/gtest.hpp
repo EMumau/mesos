@@ -227,7 +227,7 @@ template <typename T1, typename T2>
 #define SLEEP_COMMAND(x) "sleep " #x
 #else
 #define SLEEP_COMMAND(x) \
-  "powershell -NoProfile -Command Start-Sleep -Seconds " #x
+  ((x) > 0 ? "ping 127.0.0.1 -n " #x " > NUL" : "CMD /C exit 0")
 #endif // __WINDOWS__
 
 
